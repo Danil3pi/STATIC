@@ -1,12 +1,24 @@
 '''Документация'''
 
 import collections
+def get_keys_dict(text: str) -> dict:
+    '''Считываем символы в тексте.'''
+    return collections.Counter(text)
+
+def get_text(file_name: str) -> str:
+    '''Получаем текст.'''
+    with open(file_name, encoding='utf-8') as file:
+        return file.read()
+
+TEXT = get_text('text.txt')
+KEYS_DICT = get_keys_dict(TEXT.lower())
+print(KEYS_DICT)
 
 class Hand():
     '''
         У рук свое название.
     '''
-    def __init__(self,name, **kwargs) -> None:
+    def __init__(self, name, **kwargs) -> None:
         self.name = name
         self.fingers = {
             'forefinger' : Finger(kwargs['forefinger']), # Указательный палец
@@ -14,13 +26,21 @@ class Hand():
             'ring_finger' : Finger(kwargs['ring_finger']),
             'little_finger' : Finger(kwargs['little_finger']),
         }
+
+    def print_info(self) -> None:
+        """просто для информации"""
+        print('{} рука!'.format(self.name))
+        for finger, key in self.fingers.items():
+            print('НАГРУЗКА НА {} ПАЛЕЦ: '.format(finger),key.stress)
+
 '''
 Как создавать пальцы для разных рук?
 
 '''
 
 class Finger():
-    '''Один палец - это словарь из {клавиша:количество_нажатий}.
+    '''
+    Один палец - это словарь из {клавиша:количество_нажатий}.
     Каждый палец имеет свою нагрузку.
     '''
     def __init__(self, keys_set) -> None:
@@ -30,9 +50,20 @@ class Finger():
         self.stress = 0
         self.keys_set = keys_set
 
-    def count_finger_stress(self):
-        pass
+        self.update_finger_presses()
+        self.update_stress()
 
+    def update_finger_presses(self) -> None:
+        '''Обновление нажатий пальца.'''
+        for key in self.keys_set.keys():
+            if key in KEYS_DICT.keys():
+                self.keys_set[key] = KEYS_DICT[key]
+    
+    def update_stress(self) -> None:
+        '''Обновление нагрузки пальца.'''
+        self.stress = sum(self.keys_set.values())
+
+    
 
 class LeftHand(Hand):
     def __init__(self, name) -> None:
@@ -61,13 +92,11 @@ class RightHand(Hand):
 
 #Или можно сделать наследование от руки для правой и левой
 def main():
-    with open('text.txt', encoding='utf-8') as file:
-        TEXT = file.read()
-    
     left_hand = LeftHand('left')
     right_hand = RightHand('right')
 
-    print(left_hand.fingers)
+    left_hand.print_info()
+    right_hand.print_info()
 
 
 if __name__ == '__main__':
